@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="YOMIMASHOU! — Portal de lectura y creación para autores independientes de manga, cómic y libros." />
+  <title>YOMIMASHOU! — ¡Leamos!</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/main.css" />
+  <style>
+    .hero {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      padding: 5rem 0 3rem;
+      align-items: center;
+      min-height: calc(100vh - 64px);
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 50% 60% at 80% 50%, rgba(196,75,75,0.07) 0%, transparent 65%),
+        radial-gradient(ellipse 40% 50% at 10% 80%, rgba(232,196,104,0.05) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .hero-left { padding: 0 0 0 2rem; position: relative; z-index: 1; }
+    .hero-stats { display: flex; gap: 2.5rem; }
+    .stat-num { font-family: var(--font-display); font-size: 1.75rem; font-weight: 600; color: var(--color-accent); display: block; }
+    .stat-label { font-size: 0.6rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--color-text-muted); }
+
+    .hero-right { position: relative; height: 420px; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1; }
+
+    .fan-wrap { position: relative; width: 300px; height: 340px; }
+
+    .fan-card { position: absolute; width: 155px; height: 225px; border-radius: var(--radius-md); overflow: hidden; cursor: pointer; transform-origin: bottom center; transition: transform 0.4s cubic-bezier(.22,.68,0,1.2); box-shadow: 0 8px 32px rgba(0,0,0,0.7); }
+
+    .fan-card:nth-child(1) { left: 8px;   top: 65px; transform: rotate(-18deg); z-index: 1; }
+    .fan-card:nth-child(2) { left: 55px;  top: 32px; transform: rotate(-6deg);  z-index: 2; }
+    .fan-card:nth-child(3) { left: 105px; top: 32px; transform: rotate(6deg);   z-index: 3; }
+    .fan-card:nth-child(4) { left: 148px; top: 65px; transform: rotate(18deg);  z-index: 4; }
+
+    .fan-card:hover { z-index: 10; }
+    .fan-card:nth-child(1):hover { transform: rotate(-18deg) translateY(-24px) scale(1.04); }
+    .fan-card:nth-child(2):hover { transform: rotate(-6deg)  translateY(-24px) scale(1.04); }
+    .fan-card:nth-child(3):hover { transform: rotate(6deg)   translateY(-24px) scale(1.04); }
+    .fan-card:nth-child(4):hover { transform: rotate(18deg)  translateY(-24px) scale(1.04); }
+
+    .fan-card.active { z-index: 20 !important; }
+    .fan-card:nth-child(1).active { transform: rotate(0deg) translateX(72px)  translateY(-90px) scale(1.28) !important; }
+    .fan-card:nth-child(2).active { transform: rotate(0deg) translateX(28px)  translateY(-90px) scale(1.28) !important; }
+    .fan-card:nth-child(3).active { transform: rotate(0deg) translateX(-20px) translateY(-90px) scale(1.28) !important; }
+    .fan-card:nth-child(4).active { transform: rotate(0deg) translateX(-65px) translateY(-90px) scale(1.28) !important; }
+
+    .flip-inner { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; transition: transform 0.55s cubic-bezier(.4,0,.2,1); }
+    .fan-card.active .flip-inner { transform: rotateY(180deg); }
+
+    .flip-front, .flip-back { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; border-radius: var(--radius-md); overflow: hidden; }
+    .flip-front img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+    .flip-back { transform: rotateY(180deg); background: #1a1a1f; border: 1px solid var(--color-border); display: flex; flex-direction: column; justify-content: flex-end; padding: 14px; }
+    .flip-back-tag { font-size: 0.55rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--color-accent); margin-bottom: 4px; }
+    .flip-back-title { font-family: var(--font-display); font-size: 0.75rem; font-weight: 600; color: var(--color-primary); margin-bottom: 2px; line-height: 1.3; }
+    .flip-back-author { font-size: 0.6rem; color: var(--color-text-muted); margin-bottom: 8px; }
+    .flip-back-desc { font-size: 0.58rem; color: #b0ada6; line-height: 1.55; }
+
+    .fan-hint { margin-top: 10px; font-size: 0.6rem; color: #3a3a48; letter-spacing: 0.1em; text-transform: uppercase; }
+
+    @media (max-width: 768px) {
+      .hero { grid-template-columns: 1fr; min-height: auto; padding: 6rem 0 3rem; }
+      .hero-left { padding: 0 1rem; }
+      .hero-right { height: 320px; }
+      .fan-wrap { transform: scale(0.82); }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="header">
+    <div class="container">
+      <div class="header__inner">
+        <a href="index.html" class="header__logo">YOMI<span>!</span></a>
+        <nav class="header__nav">
+          <a href="pages/manga.html">Manga</a>
+          <a href="pages/comic.html">Cómic</a>
+          <a href="pages/libros.html">Libros</a>
+          <a href="pages/autores.html">Autores</a>
+        </nav>
+        <div class="header__actions">
+          <button class="btn btn-outline" data-action="login">Iniciar sesión</button>
+          <button class="btn btn-primary" data-action="registro">Registrarse</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="hero-left">
+      <p class="hero__kicker">読みましょう</p>
+      <h1 class="hero__title">
+        Historias que<br />
+        el mundo aún<br />
+        <em>no descubrió.</em>
+      </h1>
+      <p class="hero__subtitle">
+        Un santuario para obras independientes. Manga, cómic y libros de autores emergentes que tienen algo para decir.
+      </p>
+      <div class="hero__actions" style="margin-bottom: 2.5rem;">
+        <button class="btn btn-primary" data-action="registro">Empezar a leer</button>
+        <button class="btn btn-outline" data-action="registro">Soy autor</button>
+      </div>
+      <div class="hero-stats">
+        <div><span class="stat-num">248</span><span class="stat-label">Obras</span></div>
+        <div><span class="stat-num">91</span><span class="stat-label">Creadores</span></div>
+        <div><span class="stat-num">1.4K</span><span class="stat-label">Lectores</span></div>
+      </div>
+    </div>
+
+    <div class="hero-right">
+      <div class="fan-wrap">
+
+        <div class="fan-card">
+          <div class="flip-inner">
+            <div class="flip-front"><img src="assets/img/3_dias.JPG" alt="3 Días" /></div>
+            <div class="flip-back">
+              <span class="flip-back-tag">Libro · 2021</span>
+              <p class="flip-back-title">3 Días</p>
+              <p class="flip-back-author">Gonzalo Ventura</p>
+              <p class="flip-back-desc">Tres días para sobrevivir a un mundo que ya no reconoce lo humano. Horror, urgencia y una mano ensangrentada que lo dice todo.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="fan-card">
+          <div class="flip-inner">
+            <div class="flip-front"><img src="assets/img/bujinkan.JPG" alt="Bujinkan" /></div>
+            <div class="flip-back">
+              <span class="flip-back-tag">Libro · 2019</span>
+              <p class="flip-back-title">Ten Chi Jin Ryaku no Maki</p>
+              <p class="flip-back-author">Sajiro Janiga</p>
+              <p class="flip-back-desc">Los rollos del cielo, la tierra y el hombre. Manual de formas básicas del Bujinkan Dojo para el practicante serio.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="fan-card">
+          <div class="flip-inner">
+            <div class="flip-front"><img src="assets/img/civil_war.JPG" alt="Civil War" /></div>
+            <div class="flip-back">
+              <span class="flip-back-tag">Cómic · 2007</span>
+              <p class="flip-back-title">Civil War</p>
+              <p class="flip-back-author">Mark Millar</p>
+              <p class="flip-back-desc">Los héroes divididos. Una ley que obliga a elegir bando. La guerra más devastadora del universo Marvel en viñetas de alto voltaje.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="fan-card">
+          <div class="flip-inner">
+            <div class="flip-front"><img src="assets/img/evangelion.jpg" alt="Evangelion" /></div>
+            <div class="flip-back">
+              <span class="flip-back-tag">Manga · 1995</span>
+              <p class="flip-back-title">Neon Genesis Evangelion</p>
+              <p class="flip-back-author">Yoshiyuki Sadamoto</p>
+              <p class="flip-back-desc">Mechas, ángeles y la fragilidad del alma humana. El clásico que redefinió el anime y el manga de ciencia ficción japonesa.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <p class="fan-hint">Clic para ver detalles</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="section-header">
+        <p class="section-header__kicker">Explorá por formato</p>
+        <h2>¿Qué querés leer hoy?</h2>
+      </div>
+      <div class="categorias-grid">
+        <a href="pages/manga.html" class="categoria-card">
+          <span class="categoria-card__icon">漫</span>
+          <h3 class="categoria-card__title">Manga</h3>
+          <p class="categoria-card__desc">Lectura vertical, estética oriental, historias sin límite de género.</p>
+        </a>
+        <a href="pages/comic.html" class="categoria-card">
+          <span class="categoria-card__icon">✦</span>
+          <h3 class="categoria-card__title">Cómic</h3>
+          <p class="categoria-card__desc">Viñetas, color y narrativa visual con identidad propia.</p>
+        </a>
+        <a href="pages/libros.html" class="categoria-card">
+          <span class="categoria-card__icon">本</span>
+          <h3 class="categoria-card__title">Libros</h3>
+          <p class="categoria-card__desc">Narrativa independiente. Palabras que construyen mundos.</p>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="section-header">
+        <p class="section-header__kicker">Descubrí</p>
+        <h2>Obras independientes</h2>
+      </div>
+      <div class="obras-grid">
+        <div class="obra-card"><div class="obra-card__cover"><span class="obra-card__cover-placeholder">漫</span></div><div class="obra-card__info"><p class="obra-card__title">Título de obra</p><p class="obra-card__meta">Manga · Autor</p></div></div>
+        <div class="obra-card"><div class="obra-card__cover"><span class="obra-card__cover-placeholder">✦</span></div><div class="obra-card__info"><p class="obra-card__title">Título de obra</p><p class="obra-card__meta">Cómic · Autor</p></div></div>
+        <div class="obra-card"><div class="obra-card__cover"><span class="obra-card__cover-placeholder">本</span></div><div class="obra-card__info"><p class="obra-card__title">Título de obra</p><p class="obra-card__meta">Libro · Autor</p></div></div>
+        <div class="obra-card"><div class="obra-card__cover"><span class="obra-card__cover-placeholder">漫</span></div><div class="obra-card__info"><p class="obra-card__title">Título de obra</p><p class="obra-card__meta">Manga · Autor</p></div></div>
+        <div class="obra-card"><div class="obra-card__cover"><span class="obra-card__cover-placeholder">✦</span></div><div class="obra-card__info"><p class="obra-card__title">Título de obra</p><p class="obra-card__meta">Cómic · Autor</p></div></div>
+        <div class="obra-card"><div class="obra-card__cover"><span class="obra-card__cover-placeholder">本</span></div><div class="obra-card__info"><p class="obra-card__title">Título de obra</p><p class="obra-card__meta">Libro · Autor</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="section-header" style="max-width: 640px;">
+        <p class="section-header__kicker">Para creadores</p>
+        <h2>Aquí no pedimos fama.<br />Aquí la creamos.</h2>
+        <p style="margin-top: 1.5rem; color: var(--color-text-muted); font-size: 1.125rem; line-height: 1.7;">
+          YOMIMASHOU! es un refugio para historias no contadas y para creadores que aún no fueron legitimados por circuitos editoriales tradicionales. El valor central no es la fama previa: es tener una obra, una voz y algo para decir.
+        </p>
+        <div style="margin-top: 2rem;">
+          <button class="btn btn-primary" data-action="registro">Publicar mi obra</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer__inner">
+        <span class="footer__logo">YOMIMASHOU!</span>
+        <p class="footer__copy">© 2026 YOMIMASHOU! — Todos los derechos reservados.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/js/main.js"></script>
+  <script>
+    const fanCards = document.querySelectorAll('.fan-card');
+    fanCards.forEach((card) => {
+      card.addEventListener('click', () => {
+        const isActive = card.classList.contains('active');
+        fanCards.forEach(c => c.classList.remove('active'));
+        if (!isActive) card.classList.add('active');
+      });
+    });
+  </script>
+</body>
+</html>
